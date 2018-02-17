@@ -1,0 +1,7 @@
+A list of intial tests
+1. Canary test
+2. Game is initialized with 6 boxes
+3. Game state changes from in progress to an end state
+4. Every box is assigned a color at state change
+5. Every color assigned is unique
+6. Color assignment is random (not the same every iteration)
