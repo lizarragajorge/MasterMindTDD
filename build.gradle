@@ -43,7 +43,7 @@ project.afterEvaluate {
 
     project.task(type: JacocoReport, "junitPlatformJacocoReport",
       {
-        sourceDirectories = files("./src/main")
+        sourceDirectories = files("./src")
         classDirectories = fileTree(dir: './build/classes/main/game',
 		      excludes: ['**/ui/*.class'])
         executionData junitPlatformTestTask
