@@ -8,6 +8,7 @@ import java.awt.Color;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -226,7 +227,21 @@ public class MasterMindTest
         assertEquals(6, distinctlyFilteredColorList.size());
     }
 
-    
+    @Test
+    void generateRandomColorsIsCalledWhenNoArgumentConstructorIsCalled()
+    {
+        AtomicBoolean called = new AtomicBoolean();
+        MasterMind stub = new MasterMind()
+        {
+            protected List<Color> generateRandomColors()
+            {
+                called.set(true);
+                return Arrays.asList();
+            }
+        };
+
+        assertTrue(called.get());
+    }
 
     @Test
     void testsToSuppressRedInCoverage()
