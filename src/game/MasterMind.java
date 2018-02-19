@@ -21,41 +21,42 @@ public class MasterMind
 
     public enum GameState { IN_PROGRESS, LOST, WON}
 
-    private GameState gameState;
+    protected GameState gameState = IN_PROGRESS;
 
-    private int userAttempts;
-
-    private List<Color> gameColors = new ArrayList<>(Arrays.asList(GREEN, BLUE, YELLOW, RED, PINK, ORANGE, MAGENTA, GRAY, DARK_GRAY, LIGHT_GRAY));
+    protected int tries = 0;
 
     private final int SIZE = 6;
     private final int MAX_ATTEMPTS = 20;
 
-
     private List<Color> selection;
 
-    protected MasterMind(List<Color> listOfColors)
+    public List<Color> getAvailableColors()
     {
-        selection = listOfColors;
-        gameState = IN_PROGRESS;
-        userAttempts = 0;
+        return new ArrayList<>(Arrays.asList(GREEN, BLUE, YELLOW, RED, PINK, ORANGE, MAGENTA, GRAY, DARK_GRAY, LIGHT_GRAY));
+    }
+
+    protected MasterMind(List<Color> selectedColors)
+    {
+        selection = selectedColors;
     }
 
     public MasterMind()
     {
         selection = generateRandomColors();
-        gameState = IN_PROGRESS;
-        userAttempts = 0;
     }
 
     protected List<Color> generateRandomColors()
-    {
-         Collections.shuffle(gameColors);
+    {                                                              
+        List<Color> gameColors = getAvailableColors();
+        Collections.shuffle(gameColors);
 
-         return gameColors.subList(0, SIZE);
+        return gameColors.subList(0, SIZE);
     }
 
     public Map<Feedback, Long> guess(List<Color> userGuess)
     {
+        tries = tries + 1;
+      
         IntFunction<Feedback> computeMatchAtPosition = index ->
           selection.get(index) == userGuess.get(index) ? POSITION_MATCH :
             userGuess.contains(selection.get(index)) ? MATCH : NO_MATCH;
@@ -69,18 +70,14 @@ public class MasterMind
          feedback.computeIfAbsent(MATCH, key -> 0L);
          feedback.computeIfAbsent(POSITION_MATCH, key -> 0L);
 
+        updateGameStatus(feedback);
+
         return feedback;
-    }
-
-    public void guessEvaluation(Map<Feedback, Long> guess)
+    }                                                                                
+    
+    public void updateGameStatus(Map<Feedback, Long> guess)
     {
-
-        if (guess.get(POSITION_MATCH) == SIZE && userAttempts <= MAX_ATTEMPTS)
-            gameState = WON;
-        else if (userAttempts < MAX_ATTEMPTS - 1)
-            userAttempts = userAttempts + 1;
-        else
-            gameState = LOST;
+        gameState = (tries <= MAX_ATTEMPTS && guess.get(POSITION_MATCH) == SIZE) ? WON : (tries >= MAX_ATTEMPTS) ? LOST: IN_PROGRESS;
     }
 
     public GameState getState()

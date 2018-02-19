@@ -5,12 +5,8 @@ import org.junit.jupiter.api.BeforeEach;
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.awt.Color;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
 import game.MasterMind.Feedback;
 import static game.MasterMind.Feedback.*;
@@ -168,9 +164,7 @@ public class MasterMindTest
     @Test
     void gameStatusAfterCorrectColorsInAllPositionsReturnsWonState()
     {
-        Map<Feedback, Long> guess = masterMind.guess(Arrays.asList(Color.RED, Color.BLUE, Color.GREEN, Color.WHITE, Color.BLACK, Color.CYAN));
-
-        masterMind.guessEvaluation(guess);
+        masterMind.guess(Arrays.asList(Color.RED, Color.BLUE, Color.GREEN, Color.WHITE, Color.BLACK, Color.CYAN));
 
         assertEquals(WON, masterMind.getState());
     }
@@ -178,9 +172,8 @@ public class MasterMindTest
     @Test
     void gameStatusAfterGuessIsCalledMaxAttemptsReturnsLostState()
     {
-        Map<Feedback, Long> guess = masterMind.guess(Arrays.asList(Color.RED, Color.RED, Color.GREEN, Color.WHITE, Color.BLACK, Color.CYAN));
-
-        IntStream.range(0,20).forEach(time -> masterMind.guessEvaluation(guess));
+        masterMind.tries = 19;
+        masterMind.guess(Arrays.asList(Color.RED, Color.RED, Color.GREEN, Color.WHITE, Color.BLACK, Color.CYAN));
 
         assertEquals(LOST, masterMind.getState());
     }
@@ -188,29 +181,28 @@ public class MasterMindTest
     @Test
     void gameStatusAfterGuessIsCalledAfterCorrectGuessIsWon()
     {
-        Map<Feedback, Long> guess = masterMind.guess(Arrays.asList(Color.RED, Color.BLUE, Color.GREEN, Color.WHITE, Color.BLACK, Color.CYAN));
-
-        IntStream.range(0,2).forEach(time -> masterMind.guessEvaluation(guess));
-
-        assertEquals(WON, masterMind.getState());
-    }
-
-    @Test
-    void gameStatusAfterGuessIsCalledOnTheLastAttempt()
-    {
-        Map<Feedback, Long> wrongGuess = masterMind.guess(Arrays.asList(Color.RED, Color.RED, Color.GREEN, Color.WHITE, Color.BLACK, Color.CYAN));
-        Map<Feedback, Long> rightGuess = masterMind.guess(Arrays.asList(Color.RED, Color.BLUE, Color.GREEN, Color.WHITE, Color.BLACK, Color.CYAN));
-
-        IntStream.range(0,19).forEach(time -> masterMind.guessEvaluation(wrongGuess));
-        masterMind.guessEvaluation(rightGuess);
+        masterMind.guess(Arrays.asList(Color.RED, Color.BLUE, Color.GREEN, Color.WHITE, Color.BLACK, Color.CYAN));
+        masterMind.guess(Arrays.asList(Color.RED, Color.BLUE, Color.GREEN, Color.WHITE, Color.BLACK, Color.CYAN));
 
         assertEquals(WON, masterMind.getState());
     }
 
     @Test
-    void generateRandomColorsReturnsASetOfColors()
+    void gameStatusAfterGuessIsCalledOnTheLastAttemptIsWon()
     {
-        assertFalse(masterMind.generateRandomColors().isEmpty());
+        masterMind.tries = 19;
+        masterMind.guess(Arrays.asList(Color.RED, Color.BLUE, Color.GREEN, Color.WHITE, Color.BLACK, Color.CYAN));
+
+        assertEquals(WON, masterMind.getState());
+    }
+
+    @Test
+    void gameStatusAfterGuessExceedsMaxAttemptsAvailable()
+    {
+        masterMind.tries = 20;
+        masterMind.guess(Arrays.asList(Color.RED, Color.RED, Color.GREEN, Color.WHITE, Color.BLACK, Color.CYAN));
+
+        assertEquals(LOST, masterMind.getState());
     }
 
     @Test
@@ -222,7 +214,7 @@ public class MasterMindTest
     @Test
     void generateRandomColorsReturnsUniqueColors()
     {
-        List<Color> distinctlyFilteredColorList = masterMind.generateRandomColors().stream().distinct().collect(Collectors.toList());
+        HashSet<Color> distinctlyFilteredColorList = new HashSet<>(masterMind.generateRandomColors());
 
         assertEquals(6, distinctlyFilteredColorList.size());
     }
